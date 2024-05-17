@@ -12,7 +12,7 @@ pub fn spawn_seed_pieces(
 ) {
     for piece in board.pieces.iter() {
         let position = tile_vec_to_world_pos(piece.tile_position());
-        let mut color = piece.color();
+        let mut color = piece.piece_color().get_color();
 
         commands.spawn(
             (SpriteBundle {

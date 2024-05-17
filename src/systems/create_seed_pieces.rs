@@ -1,5 +1,5 @@
 use crate::resources::Board;
-use crate::types::PieceInfo;
+use crate::types::{PieceColor, PieceInfo};
 use bevy::math::Vec2;
 use bevy::prelude::{Color, ResMut};
 use rand::prelude::ThreadRng;
@@ -13,8 +13,8 @@ pub fn create_seed_pieces(mut board: ResMut<Board>) {
     // Generate 5 unique positions
     for _ in 0..5 {
         let (x, y) = generate_position(&mut rng, &mut positions);
-        let color = Color::rgb(rng.gen(), rng.gen(), rng.gen());
-        let piece = PieceInfo::new(Vec2::new(x as f32, y as f32), color);
+        let piece_color = PieceColor::choose_piece_color();
+        let piece = PieceInfo::new(Vec2::new(x as f32, y as f32), piece_color);
         board.push(piece);
     }
 }
