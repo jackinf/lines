@@ -1,12 +1,9 @@
-use crate::components::ScoreText;
 use bevy::asset::AssetServer;
-use bevy::prelude::{
-    default, Camera2dBundle, Commands, PositionType, Res, Style, TextBundle, TextStyle, Val,
-};
+use bevy::prelude::{default, Commands, PositionType, Res, Style, TextBundle, TextStyle, Val};
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+use crate::components::ScoreText;
 
+pub fn spawn_score(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         TextBundle::from_section(
             "Score: 0",

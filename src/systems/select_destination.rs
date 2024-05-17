@@ -1,1 +1,1 @@
-pub fn select_destination() {}
+pub fn select_piece_destination() {}
