@@ -1,9 +1,11 @@
-use crate::systems::{
-    create_seed_pieces, move_pieces, select_piece, select_piece_destination, spawn_board,
-    spawn_camera, spawn_score, spawn_seed_pieces,
-};
-use bevy::prelude::{App, FixedUpdate, IntoSystemConfigs, PreStartup, Startup, Update};
+use bevy::prelude::{App, FixedUpdate, IntoSystemConfigs, PreStartup, Update};
 use bevy::DefaultPlugins;
+use bevy_prototype_lyon::prelude::ShapePlugin;
+
+use crate::systems::{
+    create_seed_pieces, move_pieces, select_piece, spawn_board, spawn_camera, spawn_score,
+    spawn_seed_pieces,
+};
 
 mod actions;
 mod components;
@@ -15,8 +17,10 @@ mod types;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(ShapePlugin)
         .insert_resource(resources::Board::new())
         .insert_resource(resources::Score::new())
+        .insert_resource(resources::SelectionInfo::new())
         .add_systems(
             PreStartup,
             (
@@ -28,7 +32,7 @@ fn main() {
             )
                 .chain(),
         )
-        .add_systems(Update, (select_piece, select_piece_destination))
+        .add_systems(Update, select_piece)
         .add_systems(FixedUpdate, (move_pieces))
         .run();
 }

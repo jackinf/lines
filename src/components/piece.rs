@@ -1,22 +1,32 @@
+use crate::types::PieceColor;
 use bevy::math::Vec2;
-use bevy::prelude::{Color, Component};
+use bevy::prelude::Component;
 
 #[derive(Component)]
 pub struct Piece {
-    position: Vec2,
-    color: Color,
+    id: usize,
+    tile_position: Vec2,
+    piece_color: PieceColor,
 }
 
 impl Piece {
-    pub fn new(position: Vec2, color: Color) -> Self {
-        Self { position, color }
+    pub fn new(id: usize, position: Vec2, color: PieceColor) -> Self {
+        Self {
+            id,
+            tile_position: position,
+            piece_color: color,
+        }
     }
 
-    pub fn position(&self) -> Vec2 {
-        self.position
+    pub fn id(&self) -> usize {
+        self.id
     }
 
-    pub fn color(&self) -> Color {
-        self.color
+    pub fn tile_position(&self) -> Vec2 {
+        self.tile_position
+    }
+
+    pub fn piece_color(&self) -> PieceColor {
+        self.piece_color.clone()
     }
 }
