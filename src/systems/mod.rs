@@ -1,4 +1,3 @@
-mod create_seed_pieces;
 mod move_pieces;
 mod select_piece;
 mod spawn_board;
@@ -6,7 +5,6 @@ mod spawn_camera;
 mod spawn_score;
 mod spawn_seed_pieces;
 
-pub use create_seed_pieces::create_seed_pieces;
 pub use move_pieces::move_pieces;
 pub use select_piece::select_piece;
 pub use spawn_board::spawn_board;

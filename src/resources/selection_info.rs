@@ -3,14 +3,14 @@ use bevy::prelude::{Entity, Resource, Vec2};
 #[derive(Resource)]
 pub struct SelectionInfo {
     entity: Option<Entity>,
-    target: Option<Vec2>,
+    path: Vec<Vec2>,
 }
 
 impl SelectionInfo {
     pub fn new() -> Self {
         Self {
             entity: None,
-            target: None,
+            path: vec![],
         }
     }
 
@@ -30,11 +30,11 @@ impl SelectionInfo {
         self.entity.is_some()
     }
 
-    pub fn set_target(&mut self, target: Vec2) {
-        self.target = Some(target);
+    pub fn set_path(&mut self, path: Vec<Vec2>) {
+        self.path = path;
     }
 
-    pub fn get_target(&self) -> Option<Vec2> {
-        self.target
+    pub fn get_path(&self) -> Vec<Vec2> {
+        self.path.clone()
     }
 }

@@ -1,20 +1,20 @@
+use crate::constants::Coord;
 use crate::types::PieceColor;
-use bevy::math::Vec2;
 use bevy::prelude::Component;
 
 #[derive(Component)]
 pub struct Piece {
     id: usize,
-    tile_position: Vec2,
+    coord: Coord,
     piece_color: PieceColor,
 }
 
 impl Piece {
-    pub fn new(id: usize, position: Vec2, color: PieceColor) -> Self {
+    pub fn new(id: usize, coord: Coord, piece_color: PieceColor) -> Self {
         Self {
             id,
-            tile_position: position,
-            piece_color: color,
+            coord,
+            piece_color,
         }
     }
 
@@ -22,8 +22,8 @@ impl Piece {
         self.id
     }
 
-    pub fn tile_position(&self) -> Vec2 {
-        self.tile_position
+    pub fn coord(&self) -> Coord {
+        self.coord
     }
 
     pub fn piece_color(&self) -> PieceColor {
