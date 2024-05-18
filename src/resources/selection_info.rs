@@ -1,11 +1,20 @@
 use crate::constants::Coord;
 use bevy::prelude::{Entity, Resource, Vec2};
+use std::cmp::PartialEq;
+
+#[derive(Debug, PartialEq)]
+pub enum GameState {
+    ChoosingPiece,
+    MovingPiece,
+    ValidatingMove,
+    GameOver,
+}
 
 #[derive(Resource)]
 pub struct SelectionInfo {
     entity: Option<Entity>,
     path: Vec<Vec2>,
-    moving: bool,
+    state: GameState,
     dest_coord: Option<Coord>,
 }
 
@@ -14,7 +23,7 @@ impl SelectionInfo {
         Self {
             entity: None,
             path: vec![],
-            moving: false,
+            state: GameState::ChoosingPiece,
             dest_coord: None,
         }
     }
@@ -51,16 +60,36 @@ impl SelectionInfo {
         self.path.is_empty()
     }
 
-    pub fn start_moving(&mut self) {
-        self.moving = true;
+    pub fn start_choosing(&mut self) {
+        self.state = GameState::ChoosingPiece;
     }
 
-    pub fn stop_moving(&mut self) {
-        self.moving = false;
+    pub fn is_choosing(&self) -> bool {
+        self.state == GameState::ChoosingPiece
+    }
+
+    pub fn start_moving(&mut self) {
+        self.state = GameState::MovingPiece;
     }
 
     pub fn is_moving(&self) -> bool {
-        self.moving
+        self.state == GameState::MovingPiece
+    }
+
+    pub fn validate_move(&mut self) {
+        self.state = GameState::ValidatingMove;
+    }
+
+    pub fn is_validating(&self) -> bool {
+        self.state == GameState::ValidatingMove
+    }
+
+    pub fn set_game_over(&mut self) {
+        self.state = GameState::GameOver;
+    }
+
+    pub fn is_game_over(&self) -> bool {
+        self.state == GameState::GameOver
     }
 
     pub fn set_dest_coord(&mut self, coord: Coord) {

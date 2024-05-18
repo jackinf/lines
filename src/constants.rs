@@ -11,6 +11,7 @@ pub const BALL_LAYER: f32 = 10.;
 pub const BOARD_LAYER: f32 = 1.;
 pub const GRID_WIDTH: usize = 9;
 pub const GRID_HEIGHT: usize = 9;
+pub const MAX_PIECES: usize = GRID_WIDTH * GRID_HEIGHT;
 
 // const global types\
 pub type Coord = (usize, usize);

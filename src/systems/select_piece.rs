@@ -22,8 +22,7 @@ pub fn select_piece(
     q_tiles: Query<(&Transform, &Tile), With<Tile>>,
     mut selection_info: ResMut<SelectionInfo>,
 ) {
-    // Disable all interactions while the pieces are moving around
-    if selection_info.is_moving() {
+    if !selection_info.is_choosing() {
         return;
     }
 
@@ -76,7 +75,7 @@ pub fn select_piece(
                     let world_path = convert_path(path, &q_tiles);
                     println!("World path: {:?}", world_path);
 
-                    selection_info.set_dest_coord(to);
+                    selection_info.set_dest_coord(to); // deferring setting the coord until the end
                     selection_info.set_path(world_path);
                     selection_info.start_moving();
                 }

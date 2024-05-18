@@ -1,0 +1,5 @@
+pub mod spawn_new_pieces_event_handler;
+mod validate_move_event_handler;
+
+pub use spawn_new_pieces_event_handler::spawn_new_pieces_event_handler;
+pub use validate_move_event_handler::validate_move_event_handler;
