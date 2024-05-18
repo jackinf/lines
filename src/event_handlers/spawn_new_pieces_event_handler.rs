@@ -2,20 +2,13 @@ use std::collections::HashSet;
 
 use bevy::asset::AssetServer;
 use bevy::math::Vec3;
-use bevy::prelude::{
-    default, BuildChildren, Color, Commands, EventReader, EventWriter, Query, Res, ResMut, Sprite,
-    SpriteBundle, Transform,
-};
-use bevy_prototype_lyon::draw::Stroke;
-use bevy_prototype_lyon::entity::ShapeBundle;
-use bevy_prototype_lyon::geometry::GeometryBuilder;
-use bevy_prototype_lyon::shapes;
+use bevy::prelude::{Commands, default, EventReader, EventWriter, PositionType, Query, Res, ResMut, Sprite, SpriteBundle, Style, TextBundle, TextStyle, Transform, Val, Window};
 use rand::prelude::ThreadRng;
 use rand::Rng;
 
 use crate::actions::tile_to_world_pos;
 use crate::components::Piece;
-use crate::constants::{Coord, BALL_LAYER, BALL_SCALE, MAX_PIECES, TILE_SIZE};
+use crate::constants::{BALL_LAYER, BALL_SCALE, Coord, MAX_PIECES};
 use crate::events::spawn_new_pieces_event::SpawnNewPiecesEvent;
 use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
 use crate::resources::SelectionInfo;
@@ -27,6 +20,7 @@ pub fn spawn_new_pieces_event_handler(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     q_pieces: Query<&Piece>,
+    q_window: Query<&Window>,
     mut selection_info: ResMut<SelectionInfo>,
 ) {
     for spawn_new_pieces_event in spawn_new_pieces_event_reader.read() {
@@ -40,7 +34,28 @@ pub fn spawn_new_pieces_event_handler(
 
         if amount == 0 {
             selection_info.set_game_over();
-            // TODO: publish game over event
+
+            // spawn game over text in the middle of the screen
+            // get center of the screen
+            let window = q_window.single();
+            let center = Vec3::new(window.width() / 2.0, window.height() / 2.0, 0.0);
+            commands.spawn((
+                TextBundle::from_section(
+                    "Game Over!",
+                    TextStyle {
+                        font: asset_server.load("fonts/AmericanCaptain.ttf"),
+                        font_size: 200.0,
+                        ..default()
+                    },
+                )
+                    .with_style(Style {
+                        position_type: PositionType::Absolute,
+                        top: Val::Px(center.y - 100.),
+                        left: Val::Px(center.x - 300.),
+                        ..default()
+                    }),
+            ));
+
             return;
         }
 
