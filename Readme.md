@@ -2,6 +2,8 @@
 
 Here are the detailed rules with specific numbers for the game "Lines" or "Color Lines":
 
+![Lines](docs/demo.gif)
+
 ### Game Board
 The game is played on a 9x9 grid.
 
