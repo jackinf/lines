@@ -17,7 +17,7 @@ use crate::actions::tile_to_world_pos;
 use crate::components::Piece;
 use crate::constants::{Coord, BALL_LAYER, BALL_SCALE, MAX_PIECES, TILE_SIZE};
 use crate::events::spawn_new_pieces_event::SpawnNewPiecesEvent;
-use crate::events::validate_move_event::{ValidateMoveEvent, ValidationType};
+use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
 use crate::resources::SelectionInfo;
 use crate::types::PieceColor;
 
@@ -47,8 +47,8 @@ pub fn spawn_new_pieces_event_handler(
         let pieces_to_create = create_seed_pieces(amount, &mut taken_pieces);
 
         for (id, (coord, piece_color)) in pieces_to_create.into_iter().enumerate() {
-            commands
-                .spawn(SpriteBundle {
+            commands.spawn((
+                SpriteBundle {
                     texture: asset_server.load("sprites/ball.png"),
                     transform: Transform::default()
                         .with_translation(tile_to_world_pos(coord).extend(BALL_LAYER))
@@ -58,23 +58,12 @@ pub fn spawn_new_pieces_event_handler(
                         ..default()
                     },
                     ..default()
-                })
-                .insert(Piece::new(id + 1, coord, piece_color))
-                .with_children(|parent| {
-                    parent.spawn((
-                        ShapeBundle {
-                            path: GeometryBuilder::build_as(&shapes::Circle {
-                                radius: TILE_SIZE * BALL_SCALE,
-                                ..default()
-                            }),
-                            ..default()
-                        },
-                        Stroke::new(Color::BLACK, 2.0),
-                    ));
-                });
+                },
+                Piece::new(id + 1, coord, piece_color),
+            ));
         }
 
-        validate_move_event_writer.send(ValidateMoveEvent::new(ValidationType::PostSpawn));
+        validate_move_event_writer.send(ValidateMoveEvent::new(NextPlannedMove::Play));
     }
 }
 

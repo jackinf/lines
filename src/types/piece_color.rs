@@ -1,6 +1,6 @@
 use bevy::prelude::Color;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum PieceColor {
     Red,
     Green,

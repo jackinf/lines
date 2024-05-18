@@ -1,6 +1,6 @@
 use crate::components::Piece;
 use crate::constants::BALL_SPEED;
-use crate::events::validate_move_event::{ValidateMoveEvent, ValidationType};
+use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
 use crate::resources::SelectionInfo;
 use bevy::prelude::{EventWriter, Query, Res, ResMut, Time, Transform, Vec3, With};
 
@@ -39,7 +39,7 @@ pub fn move_pieces(
                         selection_info.deselect();
                         selection_info.validate_move();
                         validate_move_event_writer
-                            .send(ValidateMoveEvent::new(ValidationType::PreSpawn));
+                            .send(ValidateMoveEvent::new(NextPlannedMove::SpawnPieces));
                     }
                 }
             }
