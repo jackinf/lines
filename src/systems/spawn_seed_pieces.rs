@@ -12,7 +12,7 @@ use bevy_prototype_lyon::shapes;
 use rand::prelude::ThreadRng;
 use rand::Rng;
 
-use crate::actions::{tile_to_world_pos, tile_vec_to_world_pos};
+use crate::actions::tile_to_world_pos;
 use crate::components::Piece;
 use crate::constants::{Coord, BALL_LAYER, BALL_SCALE, TILE_SIZE};
 use crate::types::PieceColor;

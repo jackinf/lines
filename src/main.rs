@@ -25,6 +25,6 @@ fn main() {
             (spawn_camera, spawn_seed_pieces, spawn_score, spawn_board).chain(),
         )
         .add_systems(Update, select_piece)
-        .add_systems(FixedUpdate, (move_pieces))
+        .add_systems(FixedUpdate, move_pieces)
         .run();
 }

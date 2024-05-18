@@ -3,11 +3,11 @@ use bevy::prelude::{default, Commands, Res, SpriteBundle, Transform, Vec3};
 
 use crate::actions::tile_to_world_pos;
 use crate::components::Tile;
-use crate::constants::{BOARD_LAYER, TILES_HORIZONTAL, TILES_VERTICAL, TILE_SCALE};
+use crate::constants::{BOARD_LAYER, GRID_HEIGHT, GRID_WIDTH, TILE_SCALE};
 
 pub fn spawn_board(mut commands: Commands, asset_server: Res<AssetServer>) {
-    for row in 0..TILES_HORIZONTAL {
-        for col in 0..TILES_VERTICAL {
+    for row in 0..GRID_HEIGHT {
+        for col in 0..GRID_WIDTH {
             let coord = (row, col);
             let pos = tile_to_world_pos(coord);
 

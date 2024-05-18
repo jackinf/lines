@@ -1,20 +1,17 @@
+use std::collections::{HashMap, HashSet};
+
 use bevy::input::mouse::MouseButtonInput;
 use bevy::input::ButtonState;
 use bevy::prelude::{
-    Camera, Entity, EventReader, MouseButton, Query, ResMut, Transform, Vec2, Vec3Swizzles, With,
+    Camera, Entity, EventReader, MouseButton, Query, ResMut, Transform, Vec2, With,
 };
 use bevy::utils::petgraph::algo::astar;
 use bevy::window::Window;
 use petgraph::Graph;
-use std::collections::HashSet;
-use std::hash::{Hash, Hasher};
 
 use crate::actions::{is_sprite_clicked_vec3, screen_pos_to_world_pos};
 use crate::components::{Piece, Tile};
-use crate::constants::{
-    Coord, BALL_SIZE_SCALED, GRID_HEIGHT, GRID_WIDTH, TILES_HORIZONTAL, TILES_VERTICAL,
-    TILE_SIZE_SCALED,
-};
+use crate::constants::{Coord, BALL_SIZE_SCALED, GRID_HEIGHT, GRID_WIDTH, TILE_SIZE_SCALED};
 use crate::resources::SelectionInfo;
 
 pub fn select_piece(
@@ -38,7 +35,7 @@ pub fn select_piece(
         if event.button == MouseButton::Left && event.state == ButtonState::Pressed {
             let piece_clicked = q_pieces
                 .iter()
-                .find(|(entity, transform, _)| {
+                .find(|(_, transform, _)| {
                     is_sprite_clicked_vec3(transform.translation, world_pos, BALL_SIZE_SCALED)
                 })
                 .map(|(entity, _, _)| entity);
@@ -57,7 +54,7 @@ pub fn select_piece(
                     println!("Piece selected: {}", piece.index());
                 }
                 (Some(tile_clicked), None, Some(selected_piece)) => {
-                    let (transform, tile) = tile_clicked;
+                    let (_, tile) = tile_clicked;
                     // TODO: deal with unwrap in a safe manner
                     let (_, _, piece) = q_pieces.get(selected_piece).unwrap();
                     let from = piece.coord();
@@ -70,6 +67,9 @@ pub fn select_piece(
 
                     let path = compute_path(&q_pieces, from, to);
                     println!("Found a path: {:?}", path);
+
+                    let world_path = convert_path(path, &q_tiles);
+                    println!("World path: {:?}", world_path);
                     // selection_info.set_path(path);
                 }
                 _ => {}
@@ -151,7 +151,6 @@ fn compute_path(
         });
 
         if let Some(coords) = path_coords {
-            // println!("Found a path: {:?}", coords);
             return coords;
         } else {
             return vec![];
@@ -162,7 +161,25 @@ fn compute_path(
     }
 }
 
-fn convert_path(path: Vec<Coord>) -> Vec<Vec2> {
-    todo!()
-    // path.iter().map(|(x, y)| Vec2Wrapper::new(*x as f32, *y as f32)).collect()
+fn convert_path(path: Vec<Coord>, q_tiles: &Query<(&Transform, &Tile), With<Tile>>) -> Vec<Vec2> {
+    let sub_result: HashMap<Coord, Vec2> = q_tiles
+        .iter()
+        .filter_map(|(transform, tile)| {
+            if path.contains(&tile.coord()) {
+                let coord = tile.coord();
+                let world_pos = transform.translation.truncate();
+                Some((coord, world_pos))
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    let world_path = path
+        .iter()
+        // TODO: if there's at least one None, return an empty Vec
+        .map(|coord| sub_result.get(coord).unwrap().clone())
+        .collect();
+
+    world_path
 }
