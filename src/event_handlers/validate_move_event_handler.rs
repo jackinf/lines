@@ -1,10 +1,10 @@
-use crate::components::Piece;
+use crate::components::{Piece, ScoreText};
 use crate::constants::{Coord, GRID_HEIGHT, GRID_WIDTH};
 use crate::events::spawn_new_pieces_event::SpawnNewPiecesEvent;
 use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
 use crate::resources::{Score, SelectionInfo};
 use crate::types::PieceColor;
-use bevy::prelude::{Commands, Entity, EventReader, EventWriter, Query, ResMut, With};
+use bevy::prelude::{Commands, Entity, EventReader, EventWriter, Query, ResMut, Text, With};
 use bevy::utils::HashMap;
 use std::collections::HashSet;
 
@@ -13,6 +13,7 @@ pub fn validate_move_event_handler(
     mut spawn_new_pieces_event_writer: EventWriter<SpawnNewPiecesEvent>,
     mut commands: Commands,
     mut score: ResMut<Score>,
+    mut q_score_text: Query<&mut Text, With<ScoreText>>,
     q_pieces: Query<(Entity, &Piece), With<Piece>>,
     mut selection_info: ResMut<SelectionInfo>,
 ) {
@@ -27,6 +28,11 @@ pub fn validate_move_event_handler(
         let (total_score, matched_pieces) = score_and_find_matched_pieces(&piece_map, 9);
         if matched_pieces.len() > 0 {
             next_planned_move = NextPlannedMove::Play;
+
+            // Update the score text
+            score.add(total_score);
+            let mut score_text = q_score_text.single_mut();
+            score_text.sections[0].value = format!("Score: {}", score.0);
         }
 
         matched_pieces
