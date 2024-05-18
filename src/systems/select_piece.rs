@@ -76,6 +76,7 @@ pub fn select_piece(
                     let world_path = convert_path(path, &q_tiles);
                     println!("World path: {:?}", world_path);
 
+                    selection_info.set_dest_coord(to);
                     selection_info.set_path(world_path);
                     selection_info.start_moving();
                 }

@@ -26,6 +26,10 @@ impl Piece {
         self.coord
     }
 
+    pub fn set_coord(&mut self, coord: Coord) {
+        self.coord = coord;
+    }
+
     pub fn piece_color(&self) -> PieceColor {
         self.piece_color.clone()
     }

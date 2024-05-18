@@ -1,3 +1,4 @@
+use crate::constants::Coord;
 use bevy::prelude::{Entity, Resource, Vec2};
 
 #[derive(Resource)]
@@ -5,6 +6,7 @@ pub struct SelectionInfo {
     entity: Option<Entity>,
     path: Vec<Vec2>,
     moving: bool,
+    dest_coord: Option<Coord>,
 }
 
 impl SelectionInfo {
@@ -13,6 +15,7 @@ impl SelectionInfo {
             entity: None,
             path: vec![],
             moving: false,
+            dest_coord: None,
         }
     }
 
@@ -58,5 +61,16 @@ impl SelectionInfo {
 
     pub fn is_moving(&self) -> bool {
         self.moving
+    }
+
+    pub fn set_dest_coord(&mut self, coord: Coord) {
+        self.dest_coord = Some(coord);
+    }
+
+    pub fn pop_dest_coord(&mut self) -> Option<Coord> {
+        if self.dest_coord.is_none() {
+            return None;
+        }
+        self.dest_coord.take()
     }
 }

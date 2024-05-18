@@ -5,7 +5,7 @@ use bevy::prelude::{Query, Res, ResMut, Time, Transform, Vec3, With};
 
 pub fn move_pieces(
     time: Res<Time>,
-    mut q_pieces: Query<&mut Transform, With<Piece>>,
+    mut q_pieces: Query<(&mut Transform, &mut Piece), With<Piece>>,
     mut selection_info: ResMut<SelectionInfo>,
 ) {
     if !selection_info.is_moving() {
@@ -13,32 +13,31 @@ pub fn move_pieces(
     }
 
     if let Some(selected_piece) = selection_info.selected() {
-        if let Some(mut piece_transform) = q_pieces.get_mut(selected_piece).ok() {
+        if let Some((mut transform, mut piece)) = q_pieces.get_mut(selected_piece).ok() {
             if let Some(&next_destination) = selection_info.get_path().first() {
                 println!("=====================================");
-                println!("Current position: {:?}", piece_transform.translation);
+                println!("Current position: {:?}", transform.translation);
                 println!("Moving towards {:?}", next_destination);
                 let dt = time.delta_seconds();
-                let direction =
-                    (next_destination.extend(0.0) - piece_transform.translation).normalize();
+                let direction = (next_destination.extend(0.0) - transform.translation).normalize();
                 println!("Direction: {:?}", direction);
-                let new_translation = piece_transform.translation + direction * BALL_SPEED * dt;
-                piece_transform.translation = Vec3::new(
+                let new_translation = transform.translation + direction * BALL_SPEED * dt;
+                transform.translation = Vec3::new(
                     new_translation.x,
                     new_translation.y,
-                    piece_transform.translation.z,
+                    transform.translation.z,
                 );
-                println!("New translation: {:?}", piece_transform.translation);
+                println!("New translation: {:?}", transform.translation);
 
-                let distance = piece_transform
-                    .translation
-                    .truncate()
-                    .distance(next_destination);
+                let distance = transform.translation.truncate().distance(next_destination);
                 println!("Distance: {}", distance);
                 if distance < 0.1 {
                     println!("POP! Left to move: {}", selection_info.get_path().len() - 1);
                     selection_info.pop_path();
                     if selection_info.empty_path() {
+                        if let Some(coord) = selection_info.pop_dest_coord() {
+                            piece.set_coord(coord);
+                        }
                         selection_info.stop_moving();
                         selection_info.deselect();
                     }
