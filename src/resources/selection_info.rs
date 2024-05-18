@@ -4,6 +4,7 @@ use bevy::prelude::{Entity, Resource, Vec2};
 pub struct SelectionInfo {
     entity: Option<Entity>,
     path: Vec<Vec2>,
+    moving: bool,
 }
 
 impl SelectionInfo {
@@ -11,6 +12,7 @@ impl SelectionInfo {
         Self {
             entity: None,
             path: vec![],
+            moving: false,
         }
     }
 
@@ -36,5 +38,25 @@ impl SelectionInfo {
 
     pub fn get_path(&self) -> Vec<Vec2> {
         self.path.clone()
+    }
+
+    pub fn pop_path(&mut self) {
+        self.path.remove(0);
+    }
+
+    pub fn empty_path(&self) -> bool {
+        self.path.is_empty()
+    }
+
+    pub fn start_moving(&mut self) {
+        self.moving = true;
+    }
+
+    pub fn stop_moving(&mut self) {
+        self.moving = false;
+    }
+
+    pub fn is_moving(&self) -> bool {
+        self.moving
     }
 }

@@ -22,6 +22,11 @@ pub fn select_piece(
     q_tiles: Query<(&Transform, &Tile), With<Tile>>,
     mut selection_info: ResMut<SelectionInfo>,
 ) {
+    // Disable all interactions while the pieces are moving around
+    if selection_info.is_moving() {
+        return;
+    }
+
     let window = q_windows.single();
     let camera = q_camera.single();
 
@@ -70,7 +75,9 @@ pub fn select_piece(
 
                     let world_path = convert_path(path, &q_tiles);
                     println!("World path: {:?}", world_path);
-                    // selection_info.set_path(path);
+
+                    selection_info.set_path(world_path);
+                    selection_info.start_moving();
                 }
                 _ => {}
             }
