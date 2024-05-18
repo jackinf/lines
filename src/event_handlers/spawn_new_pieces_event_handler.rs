@@ -2,16 +2,20 @@ use std::collections::HashSet;
 
 use bevy::asset::AssetServer;
 use bevy::math::Vec3;
-use bevy::prelude::{Commands, default, EventReader, EventWriter, PositionType, Query, Res, ResMut, Sprite, SpriteBundle, Style, TextBundle, TextStyle, Transform, Val, Window};
+use bevy::prelude::{
+    default, AlignItems, BuildChildren, Color, Commands, EventReader, EventWriter, JustifyContent,
+    NodeBundle, PositionType, Query, Res, ResMut, Sprite, SpriteBundle, Style, TextBundle,
+    TextStyle, Transform, Val, Window,
+};
 use rand::prelude::ThreadRng;
 use rand::Rng;
 
 use crate::actions::tile_to_world_pos;
 use crate::components::Piece;
-use crate::constants::{BALL_LAYER, BALL_SCALE, Coord, MAX_PIECES};
+use crate::constants::{Coord, BALL_LAYER, BALL_SCALE, MAX_PIECES};
 use crate::events::spawn_new_pieces_event::SpawnNewPiecesEvent;
 use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
-use crate::resources::SelectionInfo;
+use crate::resources::{Score, SelectionInfo};
 use crate::types::PieceColor;
 
 pub fn spawn_new_pieces_event_handler(
@@ -20,7 +24,7 @@ pub fn spawn_new_pieces_event_handler(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     q_pieces: Query<&Piece>,
-    q_window: Query<&Window>,
+    score: Res<Score>,
     mut selection_info: ResMut<SelectionInfo>,
 ) {
     for spawn_new_pieces_event in spawn_new_pieces_event_reader.read() {
@@ -35,26 +39,51 @@ pub fn spawn_new_pieces_event_handler(
         if amount == 0 {
             selection_info.set_game_over();
 
-            // spawn game over text in the middle of the screen
-            // get center of the screen
-            let window = q_window.single();
-            let center = Vec3::new(window.width() / 2.0, window.height() / 2.0, 0.0);
-            commands.spawn((
-                TextBundle::from_section(
-                    "Game Over!",
-                    TextStyle {
-                        font: asset_server.load("fonts/AmericanCaptain.ttf"),
-                        font_size: 200.0,
-                        ..default()
+            commands
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        ..Default::default()
                     },
-                )
-                    .with_style(Style {
-                        position_type: PositionType::Absolute,
-                        top: Val::Px(center.y - 100.),
-                        left: Val::Px(center.x - 300.),
-                        ..default()
-                    }),
-            ));
+                    background_color: Color::BLACK.with_a(0.5).into(),
+                    ..Default::default()
+                })
+                .with_children(|parent| {
+                    parent.spawn(
+                        TextBundle::from_section(
+                            "Game Over!",
+                            TextStyle {
+                                font: asset_server.load("fonts/AmericanCaptain.ttf"),
+                                font_size: 200.0,
+                                color: Color::WHITE,
+                            },
+                        )
+                        .with_style(Style {
+                            position_type: PositionType::Relative,
+                            ..Default::default()
+                        }),
+                    );
+
+                    // show score
+                    parent.spawn(
+                        TextBundle::from_section(
+                            &format!("Score: {}", score.0),
+                            TextStyle {
+                                font: asset_server.load("fonts/AmericanCaptain.ttf"),
+                                font_size: 100.0,
+                                color: Color::WHITE,
+                            },
+                        )
+                        .with_style(Style {
+                            position_type: PositionType::Relative,
+                            top: Val::Px(200.0),
+                            ..Default::default()
+                        }),
+                    );
+                });
 
             return;
         }
