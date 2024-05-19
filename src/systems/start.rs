@@ -1,4 +1,4 @@
-use crate::events::spawn_new_pieces_event::SpawnNewPiecesEvent;
+use crate::events::SpawnNewPiecesEvent;
 use bevy::prelude::EventWriter;
 
 pub fn start(mut spawn_new_pieces_event_writer: EventWriter<SpawnNewPiecesEvent>) {

@@ -1,6 +1,6 @@
 use crate::components::Piece;
 use crate::constants::BALL_SPEED;
-use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
+use crate::events::{NextPlannedMove, ValidateMoveEvent};
 use crate::resources::SelectionInfo;
 use bevy::prelude::{EventWriter, Query, Res, ResMut, Time, Transform, Vec3, With};
 

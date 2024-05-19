@@ -1,12 +1,14 @@
-use crate::components::{Piece, ScoreText};
-use crate::constants::{Coord, GRID_HEIGHT, GRID_WIDTH};
-use crate::events::spawn_new_pieces_event::SpawnNewPiecesEvent;
-use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
-use crate::resources::{Score, SelectionInfo};
-use crate::types::PieceColor;
+use std::collections::HashSet;
+
 use bevy::prelude::{Commands, Entity, EventReader, EventWriter, Query, ResMut, Text, With};
 use bevy::utils::HashMap;
-use std::collections::HashSet;
+
+use crate::components::{Piece, ScoreText};
+use crate::constants::Coord;
+use crate::events::SpawnNewPiecesEvent;
+use crate::events::{NextPlannedMove, ValidateMoveEvent};
+use crate::resources::{Score, SelectionInfo};
+use crate::types::PieceColor;
 
 pub fn validate_move_event_handler(
     mut validate_move_event_reader: EventReader<ValidateMoveEvent>,
@@ -20,7 +22,7 @@ pub fn validate_move_event_handler(
     for validate_move_event in validate_move_event_reader.read() {
         let mut next_planned_move = validate_move_event.next_planned_move();
 
-        let mut piece_map = q_pieces
+        let piece_map = q_pieces
             .iter()
             .map(|(_, piece)| (piece.coord(), piece.piece_color()))
             .collect::<HashMap<Coord, PieceColor>>();
@@ -41,9 +43,6 @@ pub fn validate_move_event_handler(
             .for_each(|(entity, _)| {
                 commands.entity(entity).despawn();
             });
-
-        println!("Total score: {}", total_score);
-        println!("Matched pieces: {:?}", matched_pieces);
 
         match next_planned_move {
             NextPlannedMove::SpawnPieces => {

@@ -4,22 +4,13 @@ use bevy::prelude::Component;
 
 #[derive(Component)]
 pub struct Piece {
-    id: usize,
     coord: Coord,
     piece_color: PieceColor,
 }
 
 impl Piece {
-    pub fn new(id: usize, coord: Coord, piece_color: PieceColor) -> Self {
-        Self {
-            id,
-            coord,
-            piece_color,
-        }
-    }
-
-    pub fn id(&self) -> usize {
-        self.id
+    pub fn new(coord: Coord, piece_color: PieceColor) -> Self {
+        Self { coord, piece_color }
     }
 
     pub fn coord(&self) -> Coord {

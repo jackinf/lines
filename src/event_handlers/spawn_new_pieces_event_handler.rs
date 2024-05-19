@@ -3,9 +3,7 @@ use std::collections::HashSet;
 use bevy::asset::AssetServer;
 use bevy::math::Vec3;
 use bevy::prelude::{
-    default, AlignItems, BuildChildren, Color, Commands, EventReader, EventWriter, JustifyContent,
-    NodeBundle, PositionType, Query, Res, ResMut, Sprite, SpriteBundle, Style, TextBundle,
-    TextStyle, Transform, Val, Window,
+    default, Commands, EventReader, EventWriter, Query, Res, Sprite, SpriteBundle, Transform,
 };
 use rand::prelude::ThreadRng;
 use rand::Rng;
@@ -13,19 +11,16 @@ use rand::Rng;
 use crate::actions::tile_to_world_pos;
 use crate::components::Piece;
 use crate::constants::{Coord, BALL_LAYER, BALL_SCALE, MAX_PIECES};
-use crate::events::spawn_new_pieces_event::SpawnNewPiecesEvent;
-use crate::events::validate_move_event::{NextPlannedMove, ValidateMoveEvent};
-use crate::resources::{Score, SelectionInfo};
+use crate::events::{NextPlannedMove, ShowGameOverEvent, SpawnNewPiecesEvent, ValidateMoveEvent};
 use crate::types::PieceColor;
 
 pub fn spawn_new_pieces_event_handler(
-    mut validate_move_event_writer: EventWriter<ValidateMoveEvent>,
-    mut spawn_new_pieces_event_reader: EventReader<SpawnNewPiecesEvent>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     q_pieces: Query<&Piece>,
-    score: Res<Score>,
-    mut selection_info: ResMut<SelectionInfo>,
+    mut validate_move_event_writer: EventWriter<ValidateMoveEvent>,
+    mut spawn_new_pieces_event_reader: EventReader<SpawnNewPiecesEvent>,
+    mut show_game_over_event_writer: EventWriter<ShowGameOverEvent>,
 ) {
     for spawn_new_pieces_event in spawn_new_pieces_event_reader.read() {
         let mut taken_pieces = q_pieces
@@ -36,61 +31,14 @@ pub fn spawn_new_pieces_event_handler(
         let diff = MAX_PIECES - taken_pieces.iter().count();
         let amount = amount.min(diff);
 
-        if amount == 0 {
-            selection_info.set_game_over();
-
-            commands
-                .spawn(NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        ..Default::default()
-                    },
-                    background_color: Color::BLACK.with_a(0.5).into(),
-                    ..Default::default()
-                })
-                .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle::from_section(
-                            "Game Over!",
-                            TextStyle {
-                                font: asset_server.load("fonts/AmericanCaptain.ttf"),
-                                font_size: 200.0,
-                                color: Color::WHITE,
-                            },
-                        )
-                        .with_style(Style {
-                            position_type: PositionType::Relative,
-                            ..Default::default()
-                        }),
-                    );
-
-                    // show score
-                    parent.spawn(
-                        TextBundle::from_section(
-                            &format!("Score: {}", score.0),
-                            TextStyle {
-                                font: asset_server.load("fonts/AmericanCaptain.ttf"),
-                                font_size: 100.0,
-                                color: Color::WHITE,
-                            },
-                        )
-                        .with_style(Style {
-                            position_type: PositionType::Relative,
-                            top: Val::Px(200.0),
-                            ..Default::default()
-                        }),
-                    );
-                });
-
+        if diff == 0 {
+            show_game_over_event_writer.send(ShowGameOverEvent);
             return;
         }
 
         let pieces_to_create = create_seed_pieces(amount, &mut taken_pieces);
 
-        for (id, (coord, piece_color)) in pieces_to_create.into_iter().enumerate() {
+        for (coord, piece_color) in pieces_to_create.into_iter() {
             commands.spawn((
                 SpriteBundle {
                     texture: asset_server.load("sprites/ball.png"),
@@ -103,7 +51,7 @@ pub fn spawn_new_pieces_event_handler(
                     },
                     ..default()
                 },
-                Piece::new(id + 1, coord, piece_color),
+                Piece::new(coord, piece_color.clone()),
             ));
         }
 
