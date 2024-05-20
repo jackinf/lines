@@ -4,6 +4,7 @@ mod spawn_board;
 mod spawn_camera;
 mod spawn_score;
 mod start;
+mod animate_selected_piece;
 
 pub use move_pieces::move_pieces;
 pub use select_piece::select_piece;
