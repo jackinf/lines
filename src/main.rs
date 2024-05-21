@@ -1,9 +1,10 @@
 use crate::event_handlers::{
-    center_piece_to_tile_event_handler, show_game_over_event_hander,
-    spawn_new_pieces_event_handler, validate_move_event_handler,
+    calculate_movement_path_event_handler, center_piece_to_tile_event_handler,
+    show_game_over_event_hander, spawn_new_pieces_event_handler, validate_move_event_handler,
 };
 use crate::events::{
-    CenterPieceToTileEvent, ShowGameOverEvent, SpawnNewPiecesEvent, ValidateMoveEvent,
+    CalculateMovementPathEvent, CenterPieceToTileEvent, ShowGameOverEvent, SpawnNewPiecesEvent,
+    ValidateMoveEvent,
 };
 use crate::systems::{
     animate_selected_piece, move_pieces, select_piece, spawn_board, spawn_camera, spawn_score,
@@ -30,6 +31,7 @@ fn main() {
         .add_event::<SpawnNewPiecesEvent>()
         .add_event::<ShowGameOverEvent>()
         .add_event::<CenterPieceToTileEvent>()
+        .add_event::<CalculateMovementPathEvent>()
         .add_systems(
             Update,
             (
@@ -37,6 +39,7 @@ fn main() {
                 spawn_new_pieces_event_handler,
                 show_game_over_event_hander,
                 center_piece_to_tile_event_handler,
+                calculate_movement_path_event_handler,
             ),
         )
         .insert_resource(resources::Score::new())

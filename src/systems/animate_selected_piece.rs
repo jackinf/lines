@@ -14,10 +14,9 @@ pub fn animate_selected_piece(
 
     if let Some(selected_piece) = selection_info.selected() {
         if let Ok((mut transform, mut piece)) = q_pieces.get_mut(selected_piece) {
-            let mut bouncer = piece.bouncer();
+            let bouncer = piece.bouncer();
             bouncer.add_step(1000. * time.delta_seconds());
-            let delta = bouncer.get_y_delta();
-            transform.translation.y += delta * time.delta_seconds();
+            transform.translation.y += bouncer.get_y_delta() * time.delta_seconds();
         }
     }
 }
