@@ -2,7 +2,10 @@ use crate::event_handlers::{
     show_game_over_event_hander, spawn_new_pieces_event_handler, validate_move_event_handler,
 };
 use crate::events::{ShowGameOverEvent, SpawnNewPiecesEvent, ValidateMoveEvent};
-use crate::systems::{move_pieces, select_piece, spawn_board, spawn_camera, spawn_score, start};
+use crate::systems::{
+    animate_selected_piece, move_pieces, select_piece, spawn_board, spawn_camera, spawn_score,
+    start,
+};
 use bevy::prelude::{App, FixedUpdate, IntoSystemConfigs, PreStartup, Update};
 use bevy::DefaultPlugins;
 use bevy_prototype_lyon::prelude::ShapePlugin;
@@ -38,6 +41,6 @@ fn main() {
             (start, spawn_camera, spawn_score, spawn_board).chain(),
         )
         .add_systems(Update, select_piece)
-        .add_systems(FixedUpdate, move_pieces)
+        .add_systems(FixedUpdate, (move_pieces, animate_selected_piece))
         .run();
 }
