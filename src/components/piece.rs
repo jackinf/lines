@@ -21,13 +21,16 @@ impl Bouncer {
 
     pub fn get_y_delta(&self) -> f32 {
         let cycle_position = self.y_offset % 500.0;
-        // println!("cycle_position: {}, self.y_offset: {}", cycle_position, self.y_offset);
 
         if cycle_position >= 0.0 && cycle_position < 250.0 {
             self.step
         } else {
             -self.step
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.y_offset = 0.0;
     }
 }
 

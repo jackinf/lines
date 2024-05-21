@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use bevy::input::mouse::MouseButtonInput;
 use bevy::input::ButtonState;
 use bevy::prelude::{
-    Camera, Entity, EventReader, MouseButton, Query, ResMut, Transform, Vec2, With,
+    Camera, Entity, EventReader, EventWriter, MouseButton, Query, ResMut, Transform, Vec2, With,
 };
 use bevy::utils::petgraph::algo::astar;
 use bevy::window::Window;
@@ -12,15 +12,17 @@ use petgraph::Graph;
 use crate::actions::{is_sprite_clicked_vec3, screen_pos_to_world_pos};
 use crate::components::{Piece, Tile};
 use crate::constants::{Coord, BALL_SIZE_SCALED, GRID_HEIGHT, GRID_WIDTH, TILE_SIZE_SCALED};
+use crate::events::CenterPieceToTileEvent;
 use crate::resources::SelectionInfo;
 
 pub fn select_piece(
-    mut mouse_button_input_events: EventReader<MouseButtonInput>,
     q_windows: Query<&Window>,
     q_camera: Query<&Transform, With<Camera>>,
     q_pieces: Query<(Entity, &Transform, &Piece), With<Piece>>,
-    q_tiles: Query<(&Transform, &Tile), With<Tile>>,
+    q_tiles: Query<(Entity, &Transform, &Tile), With<Tile>>,
     mut selection_info: ResMut<SelectionInfo>,
+    mut mouse_button_input_events: EventReader<MouseButtonInput>,
+    mut center_piece_to_tile_event_writer: EventWriter<CenterPieceToTileEvent>,
 ) {
     if !selection_info.is_choosing() {
         return;
@@ -37,30 +39,39 @@ pub fn select_piece(
         let world_pos = world_pos.unwrap();
 
         if event.button == MouseButton::Left && event.state == ButtonState::Pressed {
-            let piece_clicked = q_pieces
+            let clicked_piece = q_pieces
                 .iter()
                 .find(|(_, transform, _)| {
                     is_sprite_clicked_vec3(transform.translation, world_pos, BALL_SIZE_SCALED)
                 })
                 .map(|(entity, _, _)| entity);
 
-            let tile_clicked = q_tiles.iter().find(|(transform, _)| {
+            let tile_clicked = q_tiles.iter().find(|(_, transform, _)| {
                 is_sprite_clicked_vec3(transform.translation, world_pos, TILE_SIZE_SCALED)
             });
+            if tile_clicked.is_none() {
+                continue;
+            }
+            let (tile_id, tile_transform, tile) = tile_clicked.unwrap();
 
-            match (tile_clicked, piece_clicked, selection_info.selected()) {
-                (Some(_), Some(piece), Some(selected_piece)) if piece == selected_piece => {
+            match (clicked_piece, selection_info.selected()) {
+                (Some(clicked_piece_id), Some(selected_piece_id))
+                    if clicked_piece_id == selected_piece_id =>
+                {
+                    let piece_id = selected_piece_id;
                     selection_info.deselect();
-                    println!("Piece deselected: {}", piece.index());
+                    center_piece_to_tile_event_writer
+                        .send(CenterPieceToTileEvent::new(tile_id, piece_id));
                 }
-                (Some(_), Some(piece), _) => {
-                    selection_info.select(piece);
-                    println!("Piece selected: {}", piece.index());
+                (Some(clicked_piece_id), _) => {
+                    selection_info.select(clicked_piece_id);
                 }
-                (Some(tile_clicked), None, Some(selected_piece)) => {
-                    let (_, tile) = tile_clicked;
-                    // TODO: deal with unwrap in a safe manner
-                    let (_, _, piece) = q_pieces.get(selected_piece).unwrap();
+                (None, Some(selected_piece_id)) => {
+                    let selected_piece = q_pieces.get(selected_piece_id);
+                    if selected_piece.is_err() {
+                        continue;
+                    }
+                    let (_, _, piece) = selected_piece.unwrap(); // safe to unwrap here
                     let from = piece.coord();
                     let to = tile.coord();
 
@@ -164,10 +175,13 @@ fn compute_path(
     }
 }
 
-fn convert_path(path: Vec<Coord>, q_tiles: &Query<(&Transform, &Tile), With<Tile>>) -> Vec<Vec2> {
+fn convert_path(
+    path: Vec<Coord>,
+    q_tiles: &Query<(Entity, &Transform, &Tile), With<Tile>>,
+) -> Vec<Vec2> {
     let sub_result: HashMap<Coord, Vec2> = q_tiles
         .iter()
-        .filter_map(|(transform, tile)| {
+        .filter_map(|(_, transform, tile)| {
             if path.contains(&tile.coord()) {
                 let coord = tile.coord();
                 let world_pos = transform.translation.truncate();
